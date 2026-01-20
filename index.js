@@ -55,6 +55,12 @@ app.get("/", (req, res) => {
   res.send("LibreOffice converter rodando");
 });
 
-app.listen(PORT, () => {
-  console.log("Servidor rodando na porta 3000");
+
+if (!PORT) {
+  console.error("PORT não definida");
+  process.exit(1);
+}
+
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Servidor rodando na porta ${PORT}`);
 });

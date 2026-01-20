@@ -1,20 +1,21 @@
-FROM ubuntu:22.04
+FROM node:18-bullseye
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Dependências básicas
 RUN apt update && apt install -y \
   libreoffice \
   libreoffice-writer \
   fonts-dejavu \
   locales \
+  file \
   && locale-gen en_US.UTF-8 \
-  && apt clean
+  && apt clean \
+  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-COPY package.json .
-RUN npm install
+COPY package.json ./
+RUN npm install --omit=dev
 
 COPY . .
 
