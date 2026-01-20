@@ -14,16 +14,24 @@ app.post("/convert", upload.single("file"), (req, res) => {
   }
 
   const inputPath = req.file.path;
-  const outputDir = "/tmp";
+  const pdfPath = `${inputPath}.pdf`;
 
   exec(
-    `soffice --headless --convert-to pdf ${inputPath} --outdir ${outputDir}`,
-    (error) => {
+    `soffice --headless --convert-to pdf "${inputPath}" --outdir /tmp`,
+    (error, stdout, stderr) => {
       if (error) {
-        return res.status(500).json({ error: "Erro ao converter" });
+        console.error("LibreOffice error:", stderr);
+        return res.status(500).json({
+          error: "Erro ao converter",
+          details: stderr
+        });
       }
 
-      const pdfPath = inputPath.replace(path.extname(input.file), ".pdf");
+      if (!fs.existsSync(pdfPath)) {
+        return res.status(500).json({
+          error: "PDF não gerado"
+        });
+      }
 
       res.download(pdfPath, "arquivo.pdf", () => {
         fs.unlinkSync(inputPath);
@@ -32,6 +40,7 @@ app.post("/convert", upload.single("file"), (req, res) => {
     }
   );
 });
+
 
 app.get("/", (req, res) => {
   res.send("LibreOffice converter rodando");
