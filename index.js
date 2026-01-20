@@ -3,6 +3,7 @@ import multer from "multer";
 import { exec } from "child_process";
 import fs from "fs";
 import path from "path";
+const PORT = process.env.PORT || 3000;
 
 const app = express();
 const upload = multer({ dest: "/tmp" });
@@ -36,6 +37,6 @@ app.get("/", (req, res) => {
   res.send("LibreOffice converter rodando");
 });
 
-app.listen(3000, () => {
+app.listen(PORT, () => {
   console.log("Servidor rodando na porta 3000");
 });
