@@ -16,29 +16,38 @@ app.post("/convert", upload.single("file"), (req, res) => {
   const inputPath = req.file.path;
   const pdfPath = `${inputPath}.pdf`;
 
-  exec(
-    `soffice --headless --convert-to pdf "${inputPath}" --outdir /tmp`,
-    (error, stdout, stderr) => {
-      if (error) {
-        console.error("LibreOffice error:", stderr);
-        return res.status(500).json({
-          error: "Erro ao converter",
-          details: stderr
-        });
-      }
+  const cmd = `
+    soffice \
+    --headless \
+    --nologo \
+    --nofirststartwizard \
+    --norestore \
+    -env:UserInstallation=file:///tmp/lo-profile \
+    --convert-to pdf \
+    "${inputPath}" \
+    --outdir /tmp
+  `;
 
-      if (!fs.existsSync(pdfPath)) {
-        return res.status(500).json({
-          error: "PDF não gerado"
-        });
-      }
-
-      res.download(pdfPath, "arquivo.pdf", () => {
-        fs.unlinkSync(inputPath);
-        fs.unlinkSync(pdfPath);
+  exec(cmd, { timeout: 30000 }, (error, stdout, stderr) => {
+    if (error) {
+      console.error("LibreOffice stderr:", stderr);
+      return res.status(500).json({
+        error: "Erro ao converter",
+        details: stderr
       });
     }
-  );
+
+    if (!fs.existsSync(pdfPath)) {
+      return res.status(500).json({
+        error: "PDF não gerado"
+      });
+    }
+
+    res.download(pdfPath, "arquivo.pdf", () => {
+      fs.unlinkSync(inputPath);
+      fs.unlinkSync(pdfPath);
+    });
+  });
 });
 
 

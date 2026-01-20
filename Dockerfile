@@ -7,10 +7,9 @@ RUN apt update && apt install -y \
   libreoffice \
   libreoffice-writer \
   fonts-dejavu \
-  nodejs \
-  npm \
-  && apt clean \
-  && rm -rf /var/lib/apt/lists/*
+  locales \
+  && locale-gen en_US.UTF-8 \
+  && apt clean
 
 WORKDIR /app
 
